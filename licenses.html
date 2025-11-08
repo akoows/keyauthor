@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gerenciar Licenças</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo"><img src="src/logo.png" style="width: 90%;"></div>
+    <div class="nav">
+      <div class="nav-item active">Licenças</div>
+      <div class="nav-item" onclick="window.location.href='configs.html'">Configurações</div>
+    </div>
+    <div class="footer" onclick="window.location.href='profile.html'">
+      <img id="userAvatar" src="https://res.cloudinary.com/dylkeqcms/image/upload/v1762125098/default_uqhrk3.jpg" alt="Avatar">
+      <div class="footer-text">
+        <h3 id="userName">Usuário</h3>
+        <p id="userEmail">email@example.com</p>
+        <button class="logout-btn" onclick="logout()">Sair</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="nav-item" onclick="voltarParaAplicacoes()">← Voltar</div>
+      <h2 id="appTitle">Licenças da Aplicação</h2>
+      <div class="actions">
+        <button class="btn primary" onclick="abrirModalLicenca()">+ Nova Licença</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="app-info" id="appInfo" style="background: var(--panel); padding: 20px; border-radius: var(--radius); margin-bottom: 20px; border: 1px solid #1f1f1f;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <img id="appImage" src="" alt="App" style="width: 60px; height: 60px; border-radius: var(--radius); object-fit: cover;">
+          <div>
+            <h3 id="appName">Nome da Aplicação</h3>
+            <p id="appDetails" style="color: var(--muted); font-size: 14px; margin: 5px 0 0 0;"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabela de Licenças -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Chave da Licença</th>
+              <th>Status</th>
+              <th>Tag</th>
+              <th>Duração (dias)</th>
+              <th>Ativada em</th>
+              <th>Expira em</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="licensesTable">
+            <tr><td colspan="7" class="no-data">Carregando licenças...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<!-- Modal Nova Licença -->
+<div class="modal" id="modalLicenca">
+  <div class="modal-content" style="width: 400px;">
+    <h3>Nova Licença</h3>
+    
+    <div class="form-group">
+      <label for="licenseDuration">Duração (dias)</label>
+      <input type="number" id="licenseDuration" value="30" min="1">
+      <small>Duração em dias a partir da primeira ativação</small>
+    </div>
+
+    <div class="modal-buttons">
+      <button class="btn primary" onclick="criarLicenca()">Criar Licença</button>
+      <button class="btn cancel" onclick="fecharModal('modalLicenca')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+  <!-- Modal de Mensagem / Confirmação -->
+  <div class="modal" id="modalMensagem">
+    <div class="modal-content" style="max-width: 420px;">
+      <h3 id="modalMensagemTitulo">Mensagem</h3>
+      <p id="modalMensagemTexto" style="margin: 15px 0; color: var(--text);"></p>
+      <div class="modal-buttons" id="modalMensagemBotoes">
+        <button class="btn primary" onclick="fecharModalMensagem()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificações -->
+  <div class="notif-container" id="notifContainer"></div>
+
+  <script>
+    const apiUrl = "https://keyer.camposcloud.app/api";
+    let currentApp = null;
+    let currentUserId = null;
+
+    function notify(type, message) {
+      const div = document.createElement("div");
+      div.className = `notif-msg ${type}`;
+      div.innerText = message;
+      notifContainer.appendChild(div);
+      setTimeout(() => div.remove(), 4000);
+    }
+
+    function voltarParaAplicacoes() { window.location.href = 'dashboard.html'; }
+
+    function abrirModalLicenca() { document.getElementById('modalLicenca').classList.add("active"); }
+    function fecharModal(id) { document.getElementById(id).classList.remove("active"); }
+
+    async function carregarUsuario() {
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        mostrarModalMensagem({ titulo: "Erro", texto: "Usuário não autenticado", tipo: "error" });
+        setTimeout(voltarParaAplicacoes, 2000);
+        return;
+      }
+      currentUserId = userId;
+      try {
+        const res = await fetch(`${apiUrl}/users/${userId}`);
+        const user = await res.json();
+        if (!res.ok) throw new Error("Erro ao carregar usuário");
+        userName.textContent = user.name;
+        userEmail.textContent = user.email;
+        userAvatar.src = user.avatarUrl;
+      } catch {
+        mostrarModalMensagem({ titulo: "Erro", texto: "Erro ao carregar dados do usuário", tipo: "error" });
+      }
+    }
+
+    function carregarAplicacao() {
+      const appData = localStorage.getItem('selectedApp');
+      if (!appData) {
+        mostrarModalMensagem({ titulo: "Erro", texto: "Nenhuma aplicação selecionada", tipo: "error" });
+        setTimeout(voltarParaAplicacoes, 2000);
+        return;
+      }
+      currentApp = JSON.parse(appData);
+      appTitle.textContent = `Licenças - ${currentApp.name}`;
+      appName.textContent = currentApp.name;
+      appImage.src = currentApp.image;
+      appDetails.textContent = `Tag: ${currentApp.config.tag} | Duração padrão: ${currentApp.config.default_duration} dias`;
+      licenseDuration.value = currentApp.config.default_duration;
+    }
+
+    async function carregarLicencas() {
+      if (!currentUserId || !currentApp) return;
+      try {
+        const res = await fetch(`${apiUrl}/licenses/user/${currentUserId}`);
+        const allLicenses = await res.json();
+        const licenses = allLicenses.filter(l => l.appTag === currentApp.config.tag);
+        const tbody = document.getElementById('licensesTable');
+        if (!licenses.length) {
+          tbody.innerHTML = '<tr><td colspan="7" class="no-data">Nenhuma licença encontrada</td></tr>';
+          return;
+        }
+        tbody.innerHTML = "";
+        licenses.forEach(l => {
+          const tr = document.createElement("tr");
+          const statusClass = `license-status ${l.status}`;
+          const statusText = { inactive: "Inativa", active: "Ativa", expired: "Expirada" }[l.status];
+          tr.innerHTML = `
+            <td><code>${l.licenseKey}</code></td>
+            <td><span class="${statusClass}">${statusText}</span></td>
+            <td><span class="app-tag">${l.appTag}</span></td>
+            <td>${l.durationDays} dias</td>
+            <td>${l.activatedAt ? new Date(l.activatedAt).toLocaleDateString('pt-BR') : '-'}</td>
+            <td>${l.expirationDate ? new Date(l.expirationDate).toLocaleDateString('pt-BR') : '-'}</td>
+            <td>
+              <button class="btn" onclick="copiarLicenca('${l.licenseKey}')">Copiar</button>
+              <button class="btn" style="background:#27ae60;" onclick="validarLicenca('${l.licenseKey}')">Validar</button>
+              <button class="btn" style="background:#e74c3c;" onclick="deletarLicenca('${l.licenseKey}')">Deletar</button>
+            </td>`;
+          tbody.appendChild(tr);
+        });
+      } catch {
+        mostrarModalMensagem({ titulo: "Erro", texto: "Falha ao carregar licenças", tipo: "error" });
+      }
+    }
+
+    async function criarLicenca() {
+      if (!currentUserId || !currentApp) {
+        mostrarModalMensagem({ titulo: "Erro", texto: "Dados insuficientes", tipo: "error" });
+        return;
+      }
+      const durationDays = parseInt(licenseDuration.value);
+      if (!durationDays) {
+        mostrarModalMensagem({ titulo: "Aviso", texto: "Preencha a duração", tipo: "warn" });
+        return;
+      }
+      try {
+        const res = await fetch(`${apiUrl}/licenses`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: currentUserId, durationDays, appTag: currentApp.config.tag })
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || "Erro ao criar licença");
+        fecharModal('modalLicenca');
+        carregarLicencas();
+      } catch (err) {
+        mostrarModalMensagem({ titulo: "Erro", texto: err.message, tipo: "error" });
+      }
+    }
+
+    async function validarLicenca(licenseKey) {
+      try {
+        const res = await fetch(`${apiUrl}/licenses/${licenseKey}/validate`, { method: "POST" });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error);
+        const msg = result.status === "activated"
+          ? `Licença ativada! Expira em: ${new Date(result.expirationDate).toLocaleDateString('pt-BR')}`
+          : `Licença ativa! Expira em ${result.expiresIn} dias`;
+        carregarLicencas();
+      } catch {
+        mostrarModalMensagem({ titulo: "Erro", texto: "Erro ao validar licença", tipo: "error" });
+      }
+    }
+
+    async function copiarLicenca(licenseKey) {
+      try {
+        await navigator.clipboard.writeText(licenseKey);
+        mostrarModalMensagem({ titulo: "Sucesso", texto: "Chave copiada!", tipo: "success" });
+      } catch {
+        mostrarModalMensagem({ titulo: "Erro", texto: "Falha ao copiar chave", tipo: "error" });
+      }
+    }
+
+    function deletarLicenca(licenseKey) {
+      mostrarModalMensagem({
+        titulo: "Deletar Licença",
+        texto: "Tem certeza que deseja deletar esta licença?",
+        tipo: "warn",
+        confirmacao: true,
+        onConfirm: async () => {
+          try {
+            const res = await fetch(`${apiUrl}/licenses/${licenseKey}`, { method: "DELETE" });
+            if (!res.ok) throw new Error(`Erro ${res.status}`);
+            mostrarModalMensagem({ titulo: "Sucesso", texto: "Licença deletada com sucesso!", tipo: "success" });
+            carregarLicencas();
+          } catch {
+            mostrarModalMensagem({ titulo: "Erro", texto: "Erro ao deletar licença", tipo: "error" });
+          }
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarUsuario();
+      carregarAplicacao();
+      carregarLicencas();
+    });
+
+    // === MODAL DE MENSAGEM GENÉRICO ===
+    function mostrarModalMensagem({ titulo = "Mensagem", texto = "", tipo = "info", confirmacao = false, onConfirm = null }) {
+      const modal = document.getElementById("modalMensagem");
+      const tituloEl = document.getElementById("modalMensagemTitulo");
+      const textoEl = document.getElementById("modalMensagemTexto");
+      const botoesEl = document.getElementById("modalMensagemBotoes");
+      tituloEl.textContent = titulo;
+      textoEl.textContent = texto;
+      const cores = { success: "#d92628", error: "#d92628", info: "#d92628", warn: "#d92628" };
+      tituloEl.style.color = cores[tipo] || "var(--accent)";
+      botoesEl.innerHTML = "";
+      if (confirmacao) {
+        const btnOk = document.createElement("button");
+        btnOk.className = "btn primary";
+        btnOk.textContent = "Confirmar";
+        btnOk.onclick = () => { fecharModalMensagem(); if (onConfirm) onConfirm(); };
+        const btnCancel = document.createElement("button");
+        btnCancel.className = "btn cancel";
+        btnCancel.textContent = "Cancelar";
+        btnCancel.onclick = fecharModalMensagem;
+        botoesEl.append(btnOk, btnCancel);
+      } else {
+        const btnOk = document.createElement("button");
+        btnOk.className = "btn primary";
+        btnOk.textContent = "OK";
+        btnOk.onclick = fecharModalMensagem;
+        botoesEl.appendChild(btnOk);
+      }
+      modal.classList.add("active");
+    }
+    function fecharModalMensagem() { document.getElementById("modalMensagem").classList.remove("active"); }
+  </script>
+  <script src="src/scripts/auth.js"></script>
+
+  <style>
+    .form-group { margin-bottom: 15px; text-align: left; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text); font-size: 14px; }
+    .form-group input { width: 100%; padding: 10px; border: 1px solid #333; border-radius: var(--radius); background: var(--hover); color: var(--text); font-size: 14px; }
+    .form-group small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
+    .modal-content h3 { margin-bottom: 20px; color: var(--accent); text-align: center; }
+    .license-status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+    .license-status.inactive { background: #95a5a6; color: white; }
+    .license-status.active { background: #27ae60; color: white; }
+    .license-status.expired { background: #e74c3c; color: white; }
+    .app-tag { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: var(--accent); color: white; text-transform: uppercase; }
+    code { background: var(--hover); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; }
+  </style>
+</body>
+</html>
