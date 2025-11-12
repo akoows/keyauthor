@@ -99,7 +99,7 @@
   <div class="notif-container" id="notifContainer"></div>
 
   <script>
-    const apiUrl = "https://keyer.camposcloud.app/api";
+    const apiUrl = "http://localhost:3000/api";
     let currentApp = null;
     let currentUserId = null;
 
@@ -176,7 +176,6 @@
             <td>${l.expirationDate ? new Date(l.expirationDate).toLocaleDateString('pt-BR') : '-'}</td>
             <td>
               <button class="btn" onclick="copiarLicenca('${l.licenseKey}')">Copiar</button>
-              <button class="btn" style="background:#27ae60;" onclick="validarLicenca('${l.licenseKey}')">Validar</button>
               <button class="btn" style="background:#e74c3c;" onclick="deletarLicenca('${l.licenseKey}')">Deletar</button>
             </td>`;
           tbody.appendChild(tr);
@@ -207,20 +206,6 @@
         carregarLicencas();
       } catch (err) {
         mostrarModalMensagem({ titulo: "Erro", texto: err.message, tipo: "error" });
-      }
-    }
-
-    async function validarLicenca(licenseKey) {
-      try {
-        const res = await fetch(`${apiUrl}/licenses/${licenseKey}/validate`, { method: "POST" });
-        const result = await res.json();
-        if (!res.ok) throw new Error(result.error);
-        const msg = result.status === "activated"
-          ? `Licença ativada! Expira em: ${new Date(result.expirationDate).toLocaleDateString('pt-BR')}`
-          : `Licença ativa! Expira em ${result.expiresIn} dias`;
-        carregarLicencas();
-      } catch {
-        mostrarModalMensagem({ titulo: "Erro", texto: "Erro ao validar licença", tipo: "error" });
       }
     }
 
@@ -291,19 +276,5 @@
     function fecharModalMensagem() { document.getElementById("modalMensagem").classList.remove("active"); }
   </script>
   <script src="src/scripts/auth.js"></script>
-
-  <style>
-    .form-group { margin-bottom: 15px; text-align: left; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--text); font-size: 14px; }
-    .form-group input { width: 100%; padding: 10px; border: 1px solid #333; border-radius: var(--radius); background: var(--hover); color: var(--text); font-size: 14px; }
-    .form-group small { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; }
-    .modal-content h3 { margin-bottom: 20px; color: var(--accent); text-align: center; }
-    .license-status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-    .license-status.inactive { background: #95a5a6; color: white; }
-    .license-status.active { background: #27ae60; color: white; }
-    .license-status.expired { background: #e74c3c; color: white; }
-    .app-tag { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: var(--accent); color: white; text-transform: uppercase; }
-    code { background: var(--hover); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: 12px; }
-  </style>
 </body>
 </html>

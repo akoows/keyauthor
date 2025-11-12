@@ -56,6 +56,16 @@
           <small>Tempo padrão de validade para novas licenças</small>
         </div>
 
+        <div class="form-group">
+          <label for="validationHash">Hash de Validação</label>
+          <div class="row" style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="validationHash" value="" readonly>
+            <button class="btn small" onclick="copiarHash()">Copiar</button>
+          </div>
+          
+          <small>Hash usada para validar licenças</small>
+        </div>
+
         <div class="actions">
           <button class="btn primary" onclick="salvarConfiguracoes()">Salvar Alterações</button>
           <button class="btn cancel" onclick="voltarParaAplicacoes()">Cancelar</button>
@@ -68,7 +78,7 @@
   <div class="notif-container" id="notifContainer"></div>
 
   <script>
-    const apiUrl = "https://keyer.camposcloud.app/api";
+    const apiUrl = "http://localhost:3000/api";
     let currentApp = null;
     let currentUserId = null;
 
@@ -127,9 +137,10 @@
       document.getElementById('appName').textContent = currentApp.name;
       document.getElementById('appImage').src = currentApp.image;
       document.getElementById('appDetails').textContent = 
-        `Tag atual: ${currentApp.config.tag} | Duração padrão: ${currentApp.config.default_duration} dias`;
+        `Tag atual: ${currentApp.config.tag.toUpperCase()} | Duração padrão: ${currentApp.config.default_duration} dias`;
 
-      document.getElementById('appTag').value = currentApp.config.tag;
+      document.getElementById('appTag').value = currentApp.config.tag.toUpperCase();
+      document.getElementById('validationHash').value = currentApp.validation;
       document.getElementById('defaultDuration').value = currentApp.config.default_duration;
     }
 
@@ -173,6 +184,15 @@
         console.error(err);
         notify("error", "Falha ao salvar configurações no servidor");
     }
+    }
+
+    async function copiarHash(licenseey) {
+      try {
+        await navigator.clipboard.writeText(currentApp.validation);
+        notify("success", "Hash copiada para a área de transferência");
+      } catch {
+        notify("error", "Falha ao copiar a chave para a área de transferência");
+      }
     }
 
     document.addEventListener("DOMContentLoaded", () => {

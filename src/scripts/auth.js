@@ -1,5 +1,5 @@
 (async function verificarAutenticacao() {
-  const apiUrl = "https://keyer.camposcloud.app/api";
+  const apiUrl = "http://localhost:3000/api";
   const userId = localStorage.getItem("userId");
 
   if (!userId) {
