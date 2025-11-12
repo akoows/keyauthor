@@ -24,7 +24,7 @@
 }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
   color: var(--text);
   display: flex;
   min-height: 100vh;
@@ -37,8 +37,10 @@ a {
 }
 
 /* ==============================
-   SIDEBAR
+   LAYOUT PRINCIPAL
    ============================== */
+
+/* === SIDEBAR === */
 .sidebar {
   width: 230px;
   background: var(--panel);
@@ -79,15 +81,18 @@ a {
   border-left: 3px solid var(--accent);
 }
 
-/* SIDEBAR FOOTER */
+/* === SIDEBAR FOOTER === */
 .footer {
   display: flex;
   align-items: center;
-  padding: 12px 18px;
+  justify-content: flex-start;
+  text-align: left;
+  font-size: 0.85rem;
   color: var(--muted);
+  padding: 12px 18px;
   border-top: 1px solid #1f1f1f;
-  cursor: pointer;
   transition: var(--transition);
+  cursor: pointer;
 }
 
 .footer:hover {
@@ -114,7 +119,7 @@ a {
   font-size: 0.8rem;
 }
 
-/* BOTÃO DE LOGOUT */
+/* === BOTÃO DE LOGOUT === */
 .logout-btn {
   width: 100%;
   margin-top: 10px;
@@ -133,9 +138,7 @@ a {
   color: #fff;
 }
 
-/* ==============================
-   MAIN CONTENT
-   ============================== */
+/* === MAIN CONTENT === */
 .main {
   flex: 1;
   display: flex;
@@ -144,7 +147,11 @@ a {
   overflow-y: auto;
 }
 
-/* TOPBAR */
+/* ==============================
+   COMPONENTES DE INTERFACE
+   ============================== */
+
+/* === TOPBAR === */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -156,6 +163,7 @@ a {
 
 .links a {
   color: var(--muted);
+  text-decoration: none;
   margin-right: 20px;
   font-size: 0.9rem;
   transition: var(--transition);
@@ -188,9 +196,14 @@ a {
   border-radius: 50%;
 }
 
-/* ==============================
-   CONTENT AREA
-   ============================== */
+/* === CONTENT AREA === */
+.content-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
 .content {
   flex: 1;
   padding: 40px 50px;
@@ -204,9 +217,7 @@ a {
   margin-bottom: 30px;
 }
 
-/* ==============================
-   BOTÕES E AÇÕES
-   ============================== */
+/* === ACTION BUTTONS === */
 .actions {
   display: flex;
   flex-wrap: wrap;
@@ -236,8 +247,10 @@ a {
 }
 
 /* ==============================
-   TABLE
+   COMPONENTES ESPECÍFICOS
    ============================== */
+
+/* === TABLE === */
 .table-container {
   background: var(--panel);
   border-radius: var(--radius);
@@ -255,6 +268,7 @@ thead {
   color: var(--accent);
   text-transform: uppercase;
   font-size: 0.8rem;
+  letter-spacing: 0.5px;
 }
 
 th, td {
@@ -275,88 +289,71 @@ tbody tr:hover {
   background: #131313;
 }
 
-/* ==============================
-   USER PROFILE
-   ============================== */
-.profile-container {
-  max-width: 700px;
-  margin: 0 auto;
-  background: var(--panel);
+.no-data {
+  text-align: center;
+  color: #555;
   padding: 25px;
+}
+
+/* === USER PROFILE === */
+.user-profile {
+  width: 100%;
+  max-width: 950px;
+  background-color: var(--panel);
+  padding: 30px;
   border-radius: var(--radius);
-  border: 1px solid #1f1f1f;
+  display: flex;
+  align-items: center;
+  gap: 35px;
+  transition: var(--transition);
 }
 
-.profile-header {
-  text-align: center;
-  margin-bottom: 20px;
+.user-profile:hover {
+  transform: translateY(-2px);
 }
 
-.profile-header img {
-  width: 110px;
-  height: 110px;
+.user-profile img {
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
-  border: 2px solid var(--accent);
-  cursor: pointer;
-  transition: var(--transition);
+  object-fit: cover;
 }
 
-.profile-header img:hover {
-  opacity: 0.8;
+.user-infos {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
-.profile-header h2 {
-  margin: 10px 0 5px;
-  color: var(--text);
-  transition: var(--transition);
+.user-infos .right {
+  display: flex;
+  flex-direction: column;
 }
 
-.profile-header h2:hover {
-  color: var(--accent);
-}
-
-.profile-header p {
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin-bottom: 20px;
-}
-
-.stat {
-  background: var(--hover);
-  border-radius: var(--radius);
-  padding: 15px;
-  text-align: center;
-  border: 1px solid #1f1f1f;
-  transition: var(--transition);
-}
-
-.stat:hover {
-  border-color: var(--accent);
-  background: var(--accent);
+.user-infos h1 {
   color: #fff;
+  font-size: 1.6rem;
+  margin-bottom: 12px;
 }
 
-.stat h4 {
-  font-size: 13px;
-  color: var(--muted);
-  margin-bottom: 6px;
+.subscription {
+  line-height: 1.6;
+  font-size: small;
 }
 
-.stat p {
-  font-size: 22px;
+.subscription p {
+  color: var(--accent);
   font-weight: 600;
-  color: var(--text);
 }
 
-/* ==============================
-   APLICAÇÕES (CARDSD)
-   ============================== */
+.subscription p span {
+  color: #fff;
+  font-weight: 400;
+}
+
+/* === APLICAÇÕES (CARDS) === */
 .apps-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -399,9 +396,7 @@ tbody tr:hover {
   color: var(--muted);
 }
 
-/* ==============================
-   MODAL
-   ============================== */
+/* === MODAL === */
 .modal {
   display: none;
   position: fixed;
@@ -411,7 +406,6 @@ tbody tr:hover {
   justify-content: center;
   align-items: center;
   z-index: 999;
-  animation: fadeIn 0.2s ease;
 }
 
 .modal.active {
@@ -430,7 +424,17 @@ tbody tr:hover {
 .modal-content h3 {
   margin-bottom: 20px;
   color: var(--accent);
-  text-align: center;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--hover);
+  color: var(--text);
+  font-size: 14px;
 }
 
 .modal-buttons {
@@ -450,14 +454,7 @@ tbody tr:hover {
   color: var(--text);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-/* ==============================
-   NOTIFICAÇÕES
-   ============================== */
+/* === NOTIFICAÇÕES === */
 .notif-container {
   position: fixed;
   top: 20px;
@@ -487,8 +484,18 @@ tbody tr:hover {
   100% { opacity: 0; transform: translateY(-10px); }
 }
 
+/* === SCROLLBAR === */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a0d0d;
+  border-radius: 10px;
+}
+
 /* ==============================
-   FORMULÁRIOS E LOGIN
+   UTILITÁRIOS DE FORMULÁRIO
    ============================== */
 .form-group {
   margin-bottom: 15px;
@@ -503,7 +510,7 @@ tbody tr:hover {
   font-size: 14px;
 }
 
-.form-group input,
+.form-group input, 
 .form-group select {
   width: 100%;
   padding: 10px;
@@ -521,6 +528,60 @@ tbody tr:hover {
   font-size: 11px;
 }
 
+/* ==============================
+   RESPONSIVIDADE
+   ============================== */
+@media (max-width: 900px) {
+  .sidebar {
+    width: 180px;
+  }
+
+  .user-profile {
+    flex-direction: column;
+    text-align: center;
+    padding: 25px;
+  }
+
+  .user-infos {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .user-profile img {
+    margin-bottom: 15px;
+  }
+
+  .right {
+    margin-top: 15px;
+  }
+
+  .content {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    padding: 20px;
+  }
+
+  .user-profile {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .content h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* ==============================
+   ESTILOS PARA LOGIN
+   ============================== */
 .login-container {
   margin: auto;
   background: var(--panel);
@@ -589,33 +650,4 @@ a.switch-link {
   opacity: 0;
   pointer-events: none;
   position: absolute;
-}
-
-/* ==============================
-   SCROLLBAR
-   ============================== */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #3a0d0d;
-  border-radius: 10px;
-}
-
-/* ==============================
-   RESPONSIVIDADE
-   ============================== */
-@media (max-width: 900px) {
-  .sidebar { width: 180px; }
-  .user-profile { flex-direction: column; text-align: center; padding: 25px; }
-  .user-infos { flex-direction: column; align-items: center; }
-  .user-profile img { margin-bottom: 15px; }
-  .content { padding: 25px; }
-}
-
-@media (max-width: 600px) {
-  .sidebar { display: none; }
-  .main { padding: 20px; }
-  .content h2 { font-size: 1.5rem; }
 }
